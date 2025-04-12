@@ -2,15 +2,15 @@ import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import type { Purchase } from "./impulse-buying"
-import { Button } from "@/components/ui/button"
+import type { Purchase } from "./ImpulseBuying"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Item name must be at least 2 characters." }),
@@ -307,9 +307,11 @@ const PurchaseForm = ({ onSubmit }: PurchaseFormProps) => {
               </div>
             )}
 
-            <Button type="submit" className="w-full">
-              Start Reflection Process
-            </Button>
+            <CardFooter className="px-0 pt-4">
+              <Button type="submit" className="w-full">
+                Apply Details
+              </Button>
+            </CardFooter>
           </form>
         </Form>
       </CardContent>
