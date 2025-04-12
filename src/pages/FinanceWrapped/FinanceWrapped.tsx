@@ -6,8 +6,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "../../components/ui/button"
 import { Progress } from "../../components/ui/progress"
 
-
-
 // Placeholder data
 const weeklyData = {
   period: "May 6 - May 12, 2025",
@@ -29,9 +27,9 @@ const weeklyData = {
     top: [
       { name: "Spotify", amount: 9.99 },
       { name: "Netflix", amount: 8.99 },
-      { name: "iCloud", amount: 3.99 }
-    ]
-  }
+      { name: "iCloud", amount: 3.99 },
+    ],
+  },
 }
 
 // Update the monthlyData object to include subscription info
@@ -64,9 +62,9 @@ const monthlyData = {
       { name: "Gym", amount: 18.99 },
       { name: "Spotify", amount: 14.99 },
       { name: "Adobe", amount: 12.99 },
-      { name: "HBO Max", amount: 9.99 }
-    ]
-  }
+      { name: "HBO Max", amount: 9.99 },
+    ],
+  },
 }
 
 // Update the yearlyData object to include subscription info
@@ -89,10 +87,10 @@ const yearlyData = {
       { name: "Gym", amount: 227.88 },
       { name: "Spotify", amount: 179.88 },
       { name: "Adobe", amount: 155.88 },
-      { name: "Disney+", amount: 119.88 }
+      { name: "Disney+", amount: 119.88 },
     ],
-    totalPercentage: 6.4
-  }
+    totalPercentage: 6.4,
+  },
 }
 
 // Slide components
@@ -105,15 +103,17 @@ const SubscriptionSlide = ({ data, timeframe }: { data: any; timeframe: string }
         ? "from-orange-600 to-amber-600"
         : "from-teal-600 to-green-600"
 
-  const title = timeframe === "yearly" 
-    ? "Yearly Subscriptions" 
-    : timeframe === "monthly" 
-      ? "Monthly Subscriptions" 
-      : "Weekly Subscriptions";
+  const title =
+    timeframe === "yearly"
+      ? "Yearly Subscriptions"
+      : timeframe === "monthly"
+        ? "Monthly Subscriptions"
+        : "Weekly Subscriptions"
 
-  const totalText = timeframe === "yearly"
-    ? `${data.subscriptions.totalPercentage}% of yearly spend`
-    : `$${data.subscriptions.total.toFixed(2)} this ${timeframe.slice(0, -2)}`;
+  const totalText =
+    timeframe === "yearly"
+      ? `${data.subscriptions.totalPercentage}% of yearly spend`
+      : `$${data.subscriptions.total.toFixed(2)} this ${timeframe.slice(0, -2)}`
 
   return (
     <motion.div
@@ -129,7 +129,7 @@ const SubscriptionSlide = ({ data, timeframe }: { data: any; timeframe: string }
         transition={{ delay: 0.2 }}
       >
         <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-center">{title}</h1>
-        
+
         <div className="flex flex-col items-center mb-8">
           <div className="text-6xl sm:text-7xl font-extrabold mb-2">{data.subscriptions.count}</div>
           <p className="text-2xl">Active Subscriptions</p>
@@ -500,6 +500,136 @@ const BuddyHighlightSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
+// Add a new StatsOverviewSlide component after the BuddyHighlightSlide component
+const StatsOverviewSlide = ({ data, timeframe }: { data: any; timeframe: string }) => {
+  // Use more vibrant gradient backgrounds similar to Spotify Wrapped
+  const gradientClass = 
+    timeframe === "weekly" 
+      ? "from-pink-500 via-purple-500 to-indigo-500" 
+      : timeframe === "monthly"
+        ? "from-orange-500 via-red-500 to-pink-500"
+        : "from-green-500 via-teal-500 to-blue-500";
+  
+  // Prepare period text based on the passed data
+  const periodText = data.period || `Your ${timeframe} overview`;
+
+  // Safely access data properties with fallbacks to prevent rendering errors
+  const totalSpent = data.total || "$0";
+  
+  // Safely determine top category
+  const topCategory = timeframe === "yearly" && data.topCategory 
+    ? data.topCategory.name 
+    : data.categories && data.categories.length > 0 
+      ? data.categories[0].name 
+      : "None";
+  
+  // Safely access subscription count
+  const subscriptionCount = data.subscriptions?.count || 0;
+  
+  // Safely determine impulse/savings metrics
+  const impulseValue = timeframe === "yearly"
+    ? `$${data.impulseWins?.saved || 0}`
+    : timeframe === "monthly"
+      ? `$${data.impulseStats?.saved || 0}`
+      : `${data.impulseCount || 0} paused`;
+  
+  // Safely determine last stat
+  const finalStat = timeframe === "yearly" 
+    ? `${data.savingsGrowth || 0}%` 
+    : `$${data.subscriptions?.total?.toFixed(2) || "0.00"}`;
+
+  // Create stats array with safe values
+  const stats = [
+    { label: "Total Spent", value: totalSpent },
+    { label: "Top Category", value: topCategory },
+    { label: "Active Subscriptions", value: subscriptionCount },
+    {
+      label: timeframe === "yearly" ? "Money Saved" : "Impulse Control",
+      value: impulseValue,
+    },
+    {
+      label: timeframe === "yearly" ? "Savings Growth" : "Subscription Cost",
+      value: finalStat,
+    },
+  ];
+
+  // Safely get categories with fallback
+  const categories = data.categories || [];
+
+  return (
+    <motion.div
+      className={`h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br ${gradientClass} p-8`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="w-full max-w-md rounded-3xl bg-black/20 p-6 border-2 border-white/30 shadow-xl"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        {/* Header with app branding */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Finance Wrapped</h1>
+          <div className="text-sm opacity-80">{periodText}</div>
+        </div>
+        
+        {/* Title and main stat */}
+        <h2 className="text-4xl font-extrabold mb-8 text-center">
+          Your {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)} Expenses
+        </h2>
+
+        <div className="text-6xl font-extrabold text-center mb-6">{totalSpent}</div>
+
+        {/* Top categories or insights */}
+        <div className="mb-6">
+          <div className="text-xl font-bold mb-3">Top Categories</div>
+          <div className="space-y-3">
+            {categories.slice(0, 3).map((category, index) => (
+              <motion.div 
+                key={category.name || `category-${index}`}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                className="flex items-center"
+              >
+                <div className="text-lg font-medium">{index + 1}</div>
+                <div className="ml-4 text-lg font-medium">{category.name || "Unknown"}</div>
+                <div className="ml-auto text-lg font-medium">${category.amount?.toFixed(2) || "0.00"}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {stats.slice(1, 5).map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              className="bg-white/10 rounded-lg p-3 text-center"
+            >
+              <div className="text-lg font-bold">{stat.value}</div>
+              <div className="text-sm opacity-80">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Footer with branding */}
+        <div className="flex justify-between items-center pt-4 border-t border-white/20">
+          <div className="flex items-center">
+            <div className="font-bold">IMPAUSE</div>
+          </div>
+          <div className="text-sm opacity-80">IMPAUSE.TECH</div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 // Main component
 export default function FinanceWrapped() {
   const [isOpen, setIsOpen] = useState(false)
@@ -509,37 +639,41 @@ export default function FinanceWrapped() {
 
   // Define slides for each timeframe
   // Update the weeklySlides array to include the subscription slide
+  // Update the weeklySlides array to include the StatsOverviewSlide at the end
   const weeklySlides = [
     { component: SpendingSummarySlide, props: { data: weeklyData, timeframe: "weekly" } },
     { component: CategoryBreakdownSlide, props: { data: weeklyData, timeframe: "weekly" } },
     { component: TopPurchaseSlide, props: { data: weeklyData } },
     { component: ImpulseSpendSlide, props: { data: weeklyData, timeframe: "weekly" } },
-    { component: SubscriptionSlide, props: { data: weeklyData, timeframe: "weekly" } }, // Add here
+    { component: SubscriptionSlide, props: { data: weeklyData, timeframe: "weekly" } },
     { component: GoalProgressSlide, props: { data: weeklyData } },
     { component: MoneyMoodSlide, props: { data: weeklyData, timeframe: "weekly" } },
+    { component: StatsOverviewSlide, props: { data: weeklyData, timeframe: "weekly" } },
   ]
 
-  // Update the monthlySlides array to include the subscription slide
+  // Update the monthlySlides array to include the StatsOverviewSlide at the end
   const monthlySlides = [
     { component: SpendingSummarySlide, props: { data: monthlyData, timeframe: "monthly" } },
     { component: CategoryBreakdownSlide, props: { data: monthlyData, timeframe: "monthly" } },
     { component: TopMerchantsSlide, props: { data: monthlyData } },
     { component: ImpulseSpendSlide, props: { data: monthlyData, timeframe: "monthly" } },
-    { component: SubscriptionSlide, props: { data: monthlyData, timeframe: "monthly" } }, // Add here
+    { component: SubscriptionSlide, props: { data: monthlyData, timeframe: "monthly" } },
     { component: ComparisonSlide, props: { data: monthlyData } },
     { component: HighlightSlide, props: { data: monthlyData } },
+    { component: StatsOverviewSlide, props: { data: monthlyData, timeframe: "monthly" } },
   ]
 
-  // Update the yearlySlides array to include the subscription slide
+  // Update the yearlySlides array to include the StatsOverviewSlide at the end
   const yearlySlides = [
     { component: SpendingSummarySlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: CategoryBreakdownSlide, props: { data: monthlyData, timeframe: "yearly" } },
-    { component: SubscriptionSlide, props: { data: yearlyData, timeframe: "yearly" } }, // Add here
+    { component: SubscriptionSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: FavoriteStoreSlide, props: { data: yearlyData } },
     { component: ImpulseSpendSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: ImprovedHabitSlide, props: { data: yearlyData } },
     { component: MoneyMoodSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: BuddyHighlightSlide, props: { data: yearlyData } },
+    { component: StatsOverviewSlide, props: { data: yearlyData, timeframe: "yearly" } },
   ]
   // Get current slides based on timeframe
   const getSlides = () => {
@@ -675,9 +809,11 @@ export default function FinanceWrapped() {
         >
           <X className="h-5 w-5" />
         </Button>
-        <Button variant="outline" size="icon" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-          <Share2 className="h-5 w-5" />
-        </Button>
+        {currentSlide === slides.length - 1 && (
+          <Button variant="outline" size="icon" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            <Share2 className="h-5 w-5" />
+          </Button>
+        )}
       </div>
 
       <div className="absolute top-4 left-4 z-10">
