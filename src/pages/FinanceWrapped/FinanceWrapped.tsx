@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight, Share2, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "../../components/ui/button"
 import { Progress } from "../../components/ui/progress"
+import html2canvas from "html2canvas"
+import { useRef } from "react"
 
 // Placeholder data
 const weeklyData = {
@@ -95,7 +97,7 @@ const yearlyData = {
 
 // Slide components
 // Now let's create the subscription slide component
-const SubscriptionSlide = ({ data, timeframe }: { data: any; timeframe: string }) => {
+const SubscriptionSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
   const gradientClass =
     timeframe === "weekly"
       ? "from-indigo-600 to-cyan-600"
@@ -117,6 +119,7 @@ const SubscriptionSlide = ({ data, timeframe }: { data: any; timeframe: string }
 
   return (
     <motion.div
+      ref={slideRef}
       className={`h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br ${gradientClass} p-8`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -159,7 +162,7 @@ const SubscriptionSlide = ({ data, timeframe }: { data: any; timeframe: string }
   )
 }
 
-const SpendingSummarySlide = ({ data, timeframe }: { data: any; timeframe: string }) => {
+const SpendingSummarySlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
   const gradientClass =
     timeframe === "weekly"
       ? "from-purple-600 to-pink-600"
@@ -169,6 +172,7 @@ const SpendingSummarySlide = ({ data, timeframe }: { data: any; timeframe: strin
 
   return (
     <motion.div
+      ref={slideRef}
       className={`h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br ${gradientClass} p-8`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -191,7 +195,7 @@ const SpendingSummarySlide = ({ data, timeframe }: { data: any; timeframe: strin
   )
 }
 
-const CategoryBreakdownSlide = ({ data, timeframe }: { data: any; timeframe: string }) => {
+const CategoryBreakdownSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
   const gradientClass =
     timeframe === "weekly"
       ? "from-blue-600 to-purple-600"
@@ -201,6 +205,7 @@ const CategoryBreakdownSlide = ({ data, timeframe }: { data: any; timeframe: str
 
   return (
     <motion.div
+      ref={slideRef}
       className={`h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br ${gradientClass} p-8`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -240,8 +245,9 @@ const CategoryBreakdownSlide = ({ data, timeframe }: { data: any; timeframe: str
   )
 }
 
-const TopPurchaseSlide = ({ data }: { data: any }) => (
+const TopPurchaseSlide = ({ data, slideRef }: { data: any, slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
+      ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-pink-600 to-orange-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -261,7 +267,7 @@ const TopPurchaseSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
-const ImpulseSpendSlide = ({ data, timeframe }: { data: any; timeframe: string }) => {
+const ImpulseSpendSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
   const content =
     timeframe === "weekly"
       ? { title: "Impulse Spend Count", value: data.impulseCount, text: "times you bypassed the impulse buffer" }
@@ -279,6 +285,7 @@ const ImpulseSpendSlide = ({ data, timeframe }: { data: any; timeframe: string }
 
   return (
     <motion.div
+      ref={slideRef}
       className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-green-600 to-teal-600 p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -298,8 +305,9 @@ const ImpulseSpendSlide = ({ data, timeframe }: { data: any; timeframe: string }
   )
 }
 
-const GoalProgressSlide = ({ data }: { data: any }) => (
+const GoalProgressSlide = ({ data, slideRef }: { data: any, slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
+      ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-blue-600 to-violet-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -328,7 +336,7 @@ const GoalProgressSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
-const MoneyMoodSlide = ({ data, timeframe }: { data: any; timeframe: string }) => {
+const MoneyMoodSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string,  slideRef?: React.Ref<HTMLDivElement>  }) => {
   const content =
     timeframe === "weekly"
       ? { title: "Money Mood", value: data.moneyMood.type, emoji: data.moneyMood.emoji }
@@ -336,6 +344,7 @@ const MoneyMoodSlide = ({ data, timeframe }: { data: any; timeframe: string }) =
 
   return (
     <motion.div
+      ref={slideRef}
       className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-purple-600 to-pink-600 p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -355,8 +364,9 @@ const MoneyMoodSlide = ({ data, timeframe }: { data: any; timeframe: string }) =
   )
 }
 
-const TopMerchantsSlide = ({ data }: { data: any }) => (
+const TopMerchantsSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
   <motion.div
+      ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-yellow-600 to-orange-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -393,8 +403,9 @@ const TopMerchantsSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
-const ComparisonSlide = ({ data }: { data: any }) => (
+const ComparisonSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
   <motion.div
+      ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-cyan-600 to-blue-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -416,8 +427,9 @@ const ComparisonSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
-const HighlightSlide = ({ data }: { data: any }) => (
+const HighlightSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
   <motion.div
+      ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-pink-600 to-purple-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -436,8 +448,9 @@ const HighlightSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
-const FavoriteStoreSlide = ({ data }: { data: any }) => (
+const FavoriteStoreSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
   <motion.div
+      ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-amber-600 to-yellow-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -457,8 +470,9 @@ const FavoriteStoreSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
-const ImprovedHabitSlide = ({ data }: { data: any }) => (
+const ImprovedHabitSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
   <motion.div
+      ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-green-600 to-emerald-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -478,8 +492,9 @@ const ImprovedHabitSlide = ({ data }: { data: any }) => (
   </motion.div>
 )
 
-const BuddyHighlightSlide = ({ data }: { data: any }) => (
+const BuddyHighlightSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
   <motion.div
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-blue-600 to-indigo-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -501,7 +516,7 @@ const BuddyHighlightSlide = ({ data }: { data: any }) => (
 )
 
 // Add a new StatsOverviewSlide component after the BuddyHighlightSlide component
-const StatsOverviewSlide = ({ data, timeframe }: { data: any; timeframe: string }) => {
+const StatsOverviewSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
   // Use more vibrant gradient backgrounds similar to Spotify Wrapped
   const gradientClass = 
     timeframe === "weekly" 
@@ -558,6 +573,7 @@ const StatsOverviewSlide = ({ data, timeframe }: { data: any; timeframe: string 
 
   return (
     <motion.div
+      ref={slideRef}
       className={`h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br ${gradientClass} p-8`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -636,6 +652,7 @@ export default function FinanceWrapped() {
   const [timeframe, setTimeframe] = useState<"weekly" | "monthly" | "yearly">("monthly")
   const [currentSlide, setCurrentSlide] = useState(0)
   const [data, setData] = useState(monthlyData)
+  const slideRef = useRef<HTMLDivElement>(null)
 
   // Define slides for each timeframe
   // Update the weeklySlides array to include the subscription slide
@@ -643,7 +660,7 @@ export default function FinanceWrapped() {
   const weeklySlides = [
     { component: SpendingSummarySlide, props: { data: weeklyData, timeframe: "weekly" } },
     { component: CategoryBreakdownSlide, props: { data: weeklyData, timeframe: "weekly" } },
-    { component: TopPurchaseSlide, props: { data: weeklyData } },
+    { component: TopPurchaseSlide, props: { data: weeklyData, slideRef } },
     { component: ImpulseSpendSlide, props: { data: weeklyData, timeframe: "weekly" } },
     { component: SubscriptionSlide, props: { data: weeklyData, timeframe: "weekly" } },
     { component: GoalProgressSlide, props: { data: weeklyData } },
@@ -729,6 +746,37 @@ export default function FinanceWrapped() {
     }
   }
 
+const handleShareImage = async () => {
+  if (!slideRef.current) return
+
+  try {
+    const canvas = await html2canvas(slideRef.current)
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"))
+    if (!blob) throw new Error("Failed to generate image")
+
+    const file = new File([blob], "finance-wrapped.png", { type: "image/png" })
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: "My Finance Wrapped",
+        text: `Here's a snapshot of my ${timeframe} finance insights!`,
+        files: [file],
+      })
+    } else {
+      // Fallback: download image
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "finance-wrapped.png"
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  } catch (err) {
+    console.error("Share or download failed:", err)
+    alert("Could not share or download the image.")
+  }
+}
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)
     return () => {
@@ -809,11 +857,9 @@ export default function FinanceWrapped() {
         >
           <X className="h-5 w-5" />
         </Button>
-        {currentSlide === slides.length - 1 && (
-          <Button variant="outline" size="icon" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-            <Share2 className="h-5 w-5" />
-          </Button>
-        )}
+        <Button variant="outline" size="icon" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleShareImage}>
+          <Share2 className="h-5 w-5" />
+        </Button>
       </div>
 
       <div className="absolute top-4 left-4 z-10">
@@ -854,7 +900,7 @@ export default function FinanceWrapped() {
 
       <div className="flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
-          <CurrentSlideComponent key={currentSlide} {...currentSlideProps} />
+          <CurrentSlideComponent key={currentSlide} {...currentSlideProps} slideRef={slideRef} />
         </AnimatePresence>
       </div>
     </div>
