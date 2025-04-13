@@ -847,6 +847,7 @@ export default function FinanceWrapped() {
             <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
             <h2 className="text-xl font-semibold">Upload Bank Statements</h2>
             <p className="text-gray-500 mt-2">Drag and drop your PDF files here, or click to browse</p>
+            <p className="text-amber-600 mt-2">Warning: DO NOT upload real bank statements. Google may use data from Gemini's free tier for model training.</p>
           </div>
           <Button
             onClick={() => fileInputRef.current?.click()}
