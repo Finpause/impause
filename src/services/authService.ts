@@ -1,19 +1,20 @@
-import { setAuthToken, setRefreshToken, getRefreshToken } from '../utils/auth';
+import { setAuthToken, removeTokens, getAuthHeaders } from '../utils/auth';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://api.impause.com';
+// Define the auth base URL
+const AUTH_BASE_URL = 'https://auth.impause.tech';
 
-interface LoginResponse {
+interface AuthResponse {
   token: string;
-  refreshToken: string;
 }
 
-interface RegisterResponse {
-  token: string;
-  refreshToken: string;
+interface UserProfile {
+  id: string;
+  email: string;
+  // Add other user fields as needed
 }
 
-export const login = async (email: string, password: string): Promise<LoginResponse> => {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+export const login = async (email: string, password: string): Promise<AuthResponse> => {
+  const response = await fetch(`${AUTH_BASE_URL}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -27,17 +28,25 @@ export const login = async (email: string, password: string): Promise<LoginRespo
 
   const data = await response.json();
   setAuthToken(data.token);
-  setRefreshToken(data.refreshToken);
   return data;
 };
-
-export const register = async (email: string, password: string): Promise<RegisterResponse> => {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+export const register = async (
+  email: string, 
+  password: string, 
+  firstName: string, 
+  lastName: string
+): Promise<AuthResponse> => {
+  const response = await fetch(`${AUTH_BASE_URL}/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ 
+      email, 
+      password,
+      firstName,
+      lastName
+    }),
   });
 
   if (!response.ok) {
@@ -46,24 +55,48 @@ export const register = async (email: string, password: string): Promise<Registe
 
   const data = await response.json();
   setAuthToken(data.token);
-  setRefreshToken(data.refreshToken);
   return data;
 };
 
-export const refreshToken = async (): Promise<string> => {
-  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ refreshToken: getRefreshToken() }),
+export const getUserProfile = async (): Promise<UserProfile> => {
+  const response = await fetch(`${AUTH_BASE_URL}/me`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
   });
 
   if (!response.ok) {
-    throw new Error('Token refresh failed');
+    throw new Error('Failed to fetch user profile');
   }
 
-  const data = await response.json();
-  setAuthToken(data.token);
-  return data.token;
-}; 
+  return response.json();
+};
+
+export const updatePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+  const response = await fetch(`${AUTH_BASE_URL}/update-password`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update password');
+  }
+};
+
+export const logout = async (): Promise<void> => {
+  try {
+    const response = await fetch(`${AUTH_BASE_URL}/logout`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      console.error('Logout API call failed');
+    }
+  } catch (error) {
+    console.error('Error during logout API call:', error);
+  } finally {
+    // Always clear local tokens, even if the API call fails
+    removeTokens();
+  }
+};

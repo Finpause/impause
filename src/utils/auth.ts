@@ -1,7 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 
 const AUTH_TOKEN_KEY = 'auth_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
 
 export interface AuthToken {
   sub: string;
@@ -18,17 +17,8 @@ export const getAuthToken = (): string | null => {
   return localStorage.getItem(AUTH_TOKEN_KEY);
 };
 
-export const setRefreshToken = (token: string) => {
-  localStorage.setItem(REFRESH_TOKEN_KEY, token);
-};
-
-export const getRefreshToken = (): string | null => {
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
-};
-
 export const removeTokens = () => {
   localStorage.removeItem(AUTH_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
 };
 
 export const isTokenExpired = (token: string): boolean => {
@@ -40,10 +30,15 @@ export const isTokenExpired = (token: string): boolean => {
   }
 };
 
+export const isAuthenticated = (): boolean => {
+  const token = getAuthToken();
+  return !!token && !isTokenExpired(token);
+};
+
 export const getAuthHeaders = (): HeadersInit => {
   const token = getAuthToken();
   return {
     'Authorization': token ? `Bearer ${token}` : '',
     'Content-Type': 'application/json',
   };
-}; 
+};

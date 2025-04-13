@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { register } from '../../services/authService';
+import { isAuthenticated } from '../../utils/auth';
 
 const SignUp = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -14,7 +18,15 @@ const SignUp = () => {
   const [errors, setErrors] = useState({
     password: '',
     confirmPassword: '',
+    general: '',
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // If user is already authenticated, redirect to dashboard
+  if (isAuthenticated()) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -31,7 +43,7 @@ const SignUp = () => {
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { password: '', confirmPassword: '' };
+    const newErrors = { password: '', confirmPassword: '', general: '' };
 
     // Password validation
     if (formData.password.length < 8) {
@@ -49,15 +61,29 @@ const SignUp = () => {
     return isValid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      // Here you would handle the sign up logic
-      console.log('Signing up with:', formData);
-
-      // Mock sign up (replace with actual registration)
-      window.location.href = '/dashboard';
+      setIsLoading(true);
+      
+      try {
+        await register(
+          formData.email, 
+          formData.password,
+          formData.firstName,
+          formData.lastName
+        );
+        navigate('/dashboard');
+      } catch (err) {
+        setErrors(prev => ({ 
+          ...prev, 
+          general: 'Registration failed. The email may already be in use.' 
+        }));
+        console.error('Registration error:', err);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -76,22 +102,48 @@ const SignUp = () => {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
           <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+            {errors.general && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {errors.general}
+              </div>
+            )}
+            
             <form className="space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
-                  Full name
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    autoComplete="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6 px-3"
-                  />
+              <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-gray-900">
+                    First name
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      autoComplete="given-name"
+                      required
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6 px-3"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium leading-6 text-gray-900">
+                    Last name
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      autoComplete="family-name"
+                      required
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6 px-3"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -184,9 +236,10 @@ const SignUp = () => {
               <div>
                 <button
                   type="submit"
-                  className="flex w-full justify-center rounded-md bg-purple-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+                  disabled={isLoading}
+                  className="flex w-full justify-center rounded-md bg-purple-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:bg-purple-400"
                 >
-                  Sign up
+                  {isLoading ? 'Creating account...' : 'Sign up'}
                 </button>
               </div>
             </form>
