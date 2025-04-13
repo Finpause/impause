@@ -75,6 +75,19 @@ const defaultPrompts = [
   "Does this align with my financial goals?",
 ]
 
+async function generateReflectionPrompts(purchase: Purchase) {
+    // Simulate an API call to generate reflection prompts based on the purchase details
+    return new Promise<string[]>((resolve) => {
+        setTimeout(() => {
+        resolve([
+            `How does buying ${purchase.name} fit into my budget?`,
+            `What are the pros and cons of buying ${purchase.name}?`,
+            `How will I feel about this purchase in a month?`,
+        ])
+        }, 50)
+    })
+}
+
 const ImpulseBuying = () => {
   // Form and purchase state
   const [currentPurchase, setCurrentPurchase] = useState<Purchase | null>(null)
