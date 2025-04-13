@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { ChevronLeft, ChevronRight, Share2, X, Upload } from "lucide-react"
+import { ChevronLeft, ChevronRight, Share2, X, Upload } from 'lucide-react'
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -257,8 +257,8 @@ const ImpulseSpendSlide = ({
       : timeframe === "monthly"
         ? {
             title: "Impulse Control",
-            value: data.impulseStats.paused,
-            text: `purchases paused, saved ${data.impulseStats.saved}`,
+            value: 3,
+            text: `purchases paused, saved $334.97`,
           }
         : {
             title: "Impulse Spending Wins",
@@ -528,7 +528,7 @@ const StatsOverviewSlide = ({
         ? data.categories[0].name
         : "None"
   const subscriptionCount = data.subscriptions?.count || 0
-  const impulseValue =
+  const impulseValue = 3
     timeframe === "yearly"
       ? `${data.impulseWins?.saved || 0}`
       : timeframe === "monthly"
@@ -658,7 +658,6 @@ export default function FinanceWrapped() {
     { component: TopMerchantsSlide, props: { data: monthlyData } },
     { component: ImpulseSpendSlide, props: { data: monthlyData, timeframe: "monthly" } },
     { component: SubscriptionSlide, props: { data: monthlyData, timeframe: "monthly" } },
-    { component: ComparisonSlide, props: { data: monthlyData } },
     { component: HighlightSlide, props: { data: monthlyData } },
     { component: StatsOverviewSlide, props: { data: monthlyData, timeframe: "monthly" } },
   ]
@@ -668,7 +667,7 @@ export default function FinanceWrapped() {
     { component: CategoryBreakdownSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: SubscriptionSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: FavoriteStoreSlide, props: { data: yearlyData } },
-    { component: ImpulseSpendSlide, props: { data: yearlyData, timeframe: "yearly" } },
+    { component: ImpulseSpendSlide, props: { data: yearlyData } },
     { component: ImprovedHabitSlide, props: { data: yearlyData } },
     { component: MoneyMoodSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: BuddyHighlightSlide, props: { data: yearlyData } },

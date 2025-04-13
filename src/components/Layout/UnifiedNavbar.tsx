@@ -105,24 +105,7 @@ const UnifiedNavbar: React.FC = () => {
                 ) : (
                   // Navigation links for logged-out users
                   <>
-                    <Link
-                      to="/features"
-                      className="text-white hover:bg-white/10 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      Features
-                    </Link>
-                    <Link
-                      to="/pricing"
-                      className="text-white hover:bg-white/10 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      Pricing
-                    </Link>
-                    <Link
-                      to="/about"
-                      className="text-white hover:bg-white/10 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      About
-                    </Link>
+                    
                   </>
                 )}
               </div>

@@ -105,7 +105,7 @@ const Dashboard = () => {
             </div>
             <div>
               <h3 className="text-lg font-medium text-gray-500 mb-2">Impulse Saves</h3>
-              <p className="text-3xl font-bold">$328.45</p>
+              <p className="text-3xl font-bold">$334.97</p>
               <p className="text-sm text-gray-600">This month</p>
             </div>
           </div>
