@@ -246,6 +246,7 @@ const TopPurchaseSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<
   </motion.div>
 )
 
+
 const ImpulseSpendSlide = ({
   data,
   timeframe,
@@ -253,7 +254,11 @@ const ImpulseSpendSlide = ({
 }: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
   const content =
     timeframe === "weekly"
-      ? { title: "Impulse Spend Count", value: data.impulseCount, text: "times you bypassed the impulse buffer" }
+      ? {
+          title: "Impulse Control",
+          value: 1,
+          text: `purchase paused, saved $129.99`,
+        }
       : timeframe === "monthly"
         ? {
             title: "Impulse Control",
@@ -261,9 +266,9 @@ const ImpulseSpendSlide = ({
             text: `purchases paused, saved $334.97`,
           }
         : {
-            title: "Impulse Spending Wins",
-            value: data.impulseWins.count,
-            text: `purchases paused = ${data.impulseWins.saved} saved!`,
+            title: "Impulse Control",
+            value: data.impulseWins?.count || 8,
+            text: `purchases paused, saved $${data.impulseWins?.saved || '582.45'}`,
           }
 
   return (
@@ -668,7 +673,6 @@ export default function FinanceWrapped() {
     { component: SubscriptionSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: FavoriteStoreSlide, props: { data: yearlyData } },
     { component: ImpulseSpendSlide, props: { data: yearlyData } },
-    { component: ImprovedHabitSlide, props: { data: yearlyData } },
     { component: MoneyMoodSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: BuddyHighlightSlide, props: { data: yearlyData } },
     { component: StatsOverviewSlide, props: { data: yearlyData, timeframe: "yearly" } },
@@ -831,9 +835,10 @@ export default function FinanceWrapped() {
     handleFileUpload(e.dataTransfer.files)
   }
 
-  // Render the current slide
-  const CurrentSlideComponent = slides[currentSlide].component
-  const currentSlideProps = slides[currentSlide].props
+  // Before rendering, add a safety check
+  const slides2 = getSlides();
+  const CurrentSlideComponent = slides2[currentSlide]?.component || SpendingSummarySlide;
+  const currentSlideProps = slides2[currentSlide]?.props || { data: data, timeframe: timeframe };
 
   if (!isOpen) {
     return (
