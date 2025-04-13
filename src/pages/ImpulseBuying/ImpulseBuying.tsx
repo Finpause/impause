@@ -40,7 +40,7 @@ const sampleHistory: ReflectionResult[] = [
       reason: "Want to look stylish",
       needScore: 4,
     },
-    date: new Date(2025, 4, 8),
+    date: new Date(2025, 3, 8),
     outcome: "declined",
   },
   {
@@ -51,7 +51,7 @@ const sampleHistory: ReflectionResult[] = [
       reason: "Track fitness and notifications",
       needScore: 7,
     },
-    date: new Date(2025, 4, 5),
+    date: new Date(2025, 3, 1),
     outcome: "purchased",
   },
   {
@@ -62,7 +62,7 @@ const sampleHistory: ReflectionResult[] = [
       reason: "Access to exclusive content",
       needScore: 3,
     },
-    date: new Date(2025, 4, 2),
+    date: new Date(2025, 2, 23),
     outcome: "declined",
   },
 ]
