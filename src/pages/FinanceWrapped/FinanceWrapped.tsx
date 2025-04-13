@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
@@ -349,7 +351,6 @@ const MoneyMoodSlide = ({
   )
 }
 
-// Update the TopMerchantsSlide component to handle potentially missing topMerchants
 const TopMerchantsSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
     ref={slideRef}
@@ -506,13 +507,11 @@ const BuddyHighlightSlide = ({ data, slideRef }: { data: any; slideRef?: React.R
   </motion.div>
 )
 
-// Add a new StatsOverviewSlide component after the BuddyHighlightSlide component
 const StatsOverviewSlide = ({
   data,
   timeframe,
   slideRef,
 }: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
-  // Use more vibrant gradient backgrounds similar to Spotify Wrapped
   const gradientClass =
     timeframe === "weekly"
       ? "from-pink-500 via-purple-500 to-indigo-500"
@@ -520,36 +519,23 @@ const StatsOverviewSlide = ({
         ? "from-orange-500 via-red-500 to-pink-500"
         : "from-green-500 via-teal-500 to-blue-500"
 
-  // Prepare period text based on the passed data
   const periodText = data.period || `Your ${timeframe} overview`
-
-  // Safely access data properties with fallbacks to prevent rendering errors
   const totalSpent = data.total || "$0"
-
-  // Safely determine top category
   const topCategory =
     timeframe === "yearly" && data.topCategory
       ? data.topCategory.name
       : data.categories && data.categories.length > 0
         ? data.categories[0].name
         : "None"
-
-  // Safely access subscription count
   const subscriptionCount = data.subscriptions?.count || 0
-
-  // Safely determine impulse/savings metrics
   const impulseValue =
     timeframe === "yearly"
       ? `${data.impulseWins?.saved || 0}`
       : timeframe === "monthly"
         ? `${data.impulseStats?.saved || 0}`
         : `${data.impulseCount || 0} paused`
-
-  // Safely determine last stat
   const finalStat =
     timeframe === "yearly" ? `${data.savingsGrowth || 0}%` : `${data.subscriptions?.total?.toFixed(2) || "0.00"}`
-
-  // Create stats array with safe values
   const stats = [
     { label: "Total Spent", value: totalSpent },
     { label: "Top Category", value: topCategory },
@@ -563,8 +549,6 @@ const StatsOverviewSlide = ({
       value: finalStat,
     },
   ]
-
-  // Safely get categories with fallback
   const categories = data.categories || []
 
   return (
@@ -684,9 +668,9 @@ export default function FinanceWrapped() {
     { component: CategoryBreakdownSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: SubscriptionSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: FavoriteStoreSlide, props: { data: yearlyData } },
-    { component: ImpulseSpendSlide, props: { data: yearlyData } },
+    { component: ImpulseSpendSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: ImprovedHabitSlide, props: { data: yearlyData } },
-    { component: MoneyMoodSlide, props: { data: yearlyData } },
+    { component: MoneyMoodSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: BuddyHighlightSlide, props: { data: yearlyData } },
     { component: StatsOverviewSlide, props: { data: yearlyData, timeframe: "yearly" } },
   ]
@@ -846,34 +830,32 @@ export default function FinanceWrapped() {
           <p className="text-lg text-gray-600">Your spending insights visualized</p>
         </div>
 
-        {!hasData && (
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-8 text-center"
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              ref={fileInputRef}
-              multiple
-              accept="application/pdf"
-              className="hidden"
-              onChange={(e) => handleFileUpload(e.target.files)}
-            />
-            <div className="mb-4">
-              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <h2 className="text-xl font-semibold">Upload Bank Statements</h2>
-              <p className="text-gray-500 mt-2">Drag and drop your PDF files here, or click to browse</p>
-            </div>
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isLoading ? "Processing..." : "Select Files"}
-            </Button>
+        <div
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-8 text-center"
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            multiple
+            accept="application/pdf"
+            className="hidden"
+            onChange={(e) => handleFileUpload(e.target.files)}
+          />
+          <div className="mb-4">
+            <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+            <h2 className="text-xl font-semibold">Upload Bank Statements</h2>
+            <p className="text-gray-500 mt-2">Drag and drop your PDF files here, or click to browse</p>
           </div>
-        )}
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoading ? "Processing..." : "Select Files"}
+          </Button>
+        </div>
 
         <div className="grid gap-6 md:grid-cols-3">
           <div
