@@ -1,11 +1,11 @@
 import { ArrowRight, BarChart, Clock, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/Layout/Navbar';
+import UnifiedNavbar from '../../components/Layout/UnifiedNavbar';
 
 const Home = () => {
   return (
     <div className="min-h-screen">
-      <Navbar />
+      <UnifiedNavbar />
       <div className="w-full overflow-hidden">
         {/* Hero Section with Gradient Background */}
         <div className="bg-gradient-to-br from-purple-600 via-blue-500 to-orange-400 pt-10 pb-24 lg:pb-32">

@@ -1,6 +1,6 @@
 // layout.tsx
 import type { ReactNode } from 'react';
-import AuthAwareNavbar from '../../components/Layout/AuthAwareNavbar';
+import UnifiedNavbar from '../../components/Layout/UnifiedNavbar';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,7 +9,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900">
-      <AuthAwareNavbar />
+      <UnifiedNavbar />
       <main className="flex-grow">{children}</main>
       <footer className="bg-gray-800 text-white py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
