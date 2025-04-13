@@ -64,6 +64,13 @@ const App: React.FC = () => {
           <Layout><SignUp /></Layout>
         }
       />
+
+      <Route
+        path="*"
+        element={
+          <Layout><div>404 Not Found</div></Layout>
+        }
+      />
     </Routes>
   );
 };
