@@ -1,103 +1,72 @@
-"use client"
+import type React from "react"
 
-import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, Share2, X } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { ChevronLeft, ChevronRight, Share2, X, Upload } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "../../components/ui/button"
-import { Progress } from "../../components/ui/progress"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import html2canvas from "html2canvas"
-import { useRef } from "react"
+import { uploadBankStatements, transformAnalysisToWrappedData } from "@/lib/api-client"
 
-// Placeholder data
-const weeklyData = {
-  period: "May 6 - May 12, 2025",
-  total: "$325.87",
-  topPurchase: { amount: "$43", merchant: "Sephora", emoji: "💄" },
-  impulseCount: 2,
-  goalProgress: { name: "New Laptop", progress: 72, emoji: "💻" },
-  moneyMood: { type: "Saver", emoji: "🔒" },
-  categories: [
-    { name: "Food", amount: 128.45, percentage: 39, color: "from-pink-500 to-orange-500" },
-    { name: "Transport", amount: 87.32, percentage: 27, color: "from-purple-500 to-indigo-500" },
-    { name: "Fun", amount: 65.21, percentage: 20, color: "from-green-500 to-emerald-500" },
-    { name: "Other", amount: 44.89, percentage: 14, color: "from-blue-500 to-cyan-500" },
-  ],
-  // Add subscription data
+// Placeholder data for initial render
+const initialWeeklyData = {
+  period: "This Week",
+  total: "$0.00",
+  topPurchase: { amount: "$0", merchant: "None", emoji: "💸" },
+  impulseCount: 0,
+  goalProgress: { name: "Savings Goal", progress: 0, emoji: "💰" },
+  moneyMood: { type: "Unknown", emoji: "❓" },
+  categories: [],
   subscriptions: {
-    count: 3,
-    total: 22.98,
-    top: [
-      { name: "Spotify", amount: 9.99 },
-      { name: "Netflix", amount: 8.99 },
-      { name: "iCloud", amount: 3.99 },
-    ],
+    count: 0,
+    total: 0,
+    top: [],
   },
 }
 
-// Update the monthlyData object to include subscription info
-const monthlyData = {
-  period: "May 2025",
-  total: "$1,854.32",
-  categories: [
-    { name: "Food", amount: 528.45, percentage: 28, color: "from-pink-500 to-orange-500" },
-    { name: "Housing", amount: 687.32, percentage: 37, color: "from-purple-500 to-indigo-500" },
-    { name: "Entertainment", amount: 265.21, percentage: 14, color: "from-green-500 to-emerald-500" },
-    { name: "Transport", amount: 194.89, percentage: 11, color: "from-blue-500 to-cyan-500" },
-    { name: "Other", amount: 178.45, percentage: 10, color: "from-yellow-500 to-amber-500" },
-  ],
-  topMerchants: [
-    { name: "Amazon", amount: 234.56, category: "Shopping" },
-    { name: "Uber Eats", amount: 187.32, category: "Food" },
-    { name: "Spotify", amount: 14.99, category: "Entertainment" },
-  ],
-  impulseStats: { paused: 5, saved: 128 },
-  savings: 300,
-  comparison: { percentage: -12, text: "less than April" },
-  score: 82,
-  highlight: "You had your first $0 spend day in 2 weeks!",
-  // Add subscription data
+const initialMonthlyData = {
+  period: "This Month",
+  total: "$0.00",
+  categories: [],
+  topMerchants: [],
+  impulseStats: { paused: 0, saved: 0 },
+  savings: 0,
+  comparison: { percentage: 0, text: "compared to last month" },
+  score: 0,
+  highlight: "Upload your bank statements to see insights",
   subscriptions: {
-    count: 8,
-    total: 95.92,
-    top: [
-      { name: "Netflix", amount: 19.99 },
-      { name: "Gym", amount: 18.99 },
-      { name: "Spotify", amount: 14.99 },
-      { name: "Adobe", amount: 12.99 },
-      { name: "HBO Max", amount: 9.99 },
-    ],
+    count: 0,
+    total: 0,
+    top: [],
   },
 }
 
-// Update the yearlyData object to include subscription info
-const yearlyData = {
-  period: "2025",
-  total: "$21,432.98",
-  topCategory: { name: "Eating Out", amount: 2004, emoji: "🍔" },
-  favoriteStore: { name: "Target", visits: 24, emoji: "🎯" },
-  impulseWins: { count: 43, saved: 1086 },
-  savingsGrowth: 120,
-  moneyPersona: "The Balanced Boss",
-  improvedHabit: { category: "Fast Food", reduction: 31 },
-  buddyHighlight: { name: "Alex", count: 47 },
-  // Add subscription data
+const initialYearlyData = {
+  period: "This Year",
+  total: "$0.00",
+  topCategory: { name: "Unknown", amount: 0, emoji: "❓" },
+  favoriteStore: { name: "Unknown", visits: 0, emoji: "❓" },
+  impulseWins: { count: 0, saved: 0 },
+  savingsGrowth: 0,
+  moneyPersona: "Unknown",
+  improvedHabit: { category: "Unknown", reduction: 0 },
+  buddyHighlight: { name: "Finance App", count: 0 },
+  categories: [],
   subscriptions: {
-    count: 12,
-    total: 1378.68,
-    top: [
-      { name: "Netflix", amount: 239.88 },
-      { name: "Gym", amount: 227.88 },
-      { name: "Spotify", amount: 179.88 },
-      { name: "Adobe", amount: 155.88 },
-      { name: "Disney+", amount: 119.88 },
-    ],
-    totalPercentage: 6.4,
+    count: 0,
+    total: 0,
+    totalPercentage: 0,
+    top: [],
   },
 }
 
 // Slide components
 // Now let's create the subscription slide component
-const SubscriptionSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
+const SubscriptionSlide = ({
+  data,
+  timeframe,
+  slideRef,
+}: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
   const gradientClass =
     timeframe === "weekly"
       ? "from-indigo-600 to-cyan-600"
@@ -115,7 +84,7 @@ const SubscriptionSlide = ({ data, timeframe, slideRef }: { data: any; timeframe
   const totalText =
     timeframe === "yearly"
       ? `${data.subscriptions.totalPercentage}% of yearly spend`
-      : `$${data.subscriptions.total.toFixed(2)} this ${timeframe.slice(0, -2)}`
+      : `${data.subscriptions.total.toFixed(2)} this ${timeframe.slice(0, -2)}`
 
   return (
     <motion.div
@@ -162,7 +131,11 @@ const SubscriptionSlide = ({ data, timeframe, slideRef }: { data: any; timeframe
   )
 }
 
-const SpendingSummarySlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
+const SpendingSummarySlide = ({
+  data,
+  timeframe,
+  slideRef,
+}: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
   const gradientClass =
     timeframe === "weekly"
       ? "from-purple-600 to-pink-600"
@@ -195,7 +168,11 @@ const SpendingSummarySlide = ({ data, timeframe, slideRef }: { data: any; timefr
   )
 }
 
-const CategoryBreakdownSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
+const CategoryBreakdownSlide = ({
+  data,
+  timeframe,
+  slideRef,
+}: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
   const gradientClass =
     timeframe === "weekly"
       ? "from-blue-600 to-purple-600"
@@ -245,9 +222,9 @@ const CategoryBreakdownSlide = ({ data, timeframe, slideRef }: { data: any; time
   )
 }
 
-const TopPurchaseSlide = ({ data, slideRef }: { data: any, slideRef?: React.Ref<HTMLDivElement> }) => (
+const TopPurchaseSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
-      ref={slideRef}
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-pink-600 to-orange-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -267,7 +244,11 @@ const TopPurchaseSlide = ({ data, slideRef }: { data: any, slideRef?: React.Ref<
   </motion.div>
 )
 
-const ImpulseSpendSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
+const ImpulseSpendSlide = ({
+  data,
+  timeframe,
+  slideRef,
+}: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
   const content =
     timeframe === "weekly"
       ? { title: "Impulse Spend Count", value: data.impulseCount, text: "times you bypassed the impulse buffer" }
@@ -275,12 +256,12 @@ const ImpulseSpendSlide = ({ data, timeframe, slideRef }: { data: any; timeframe
         ? {
             title: "Impulse Control",
             value: data.impulseStats.paused,
-            text: `purchases paused, saved $${data.impulseStats.saved}`,
+            text: `purchases paused, saved ${data.impulseStats.saved}`,
           }
         : {
             title: "Impulse Spending Wins",
             value: data.impulseWins.count,
-            text: `purchases paused = $${data.impulseWins.saved} saved!`,
+            text: `purchases paused = ${data.impulseWins.saved} saved!`,
           }
 
   return (
@@ -305,9 +286,9 @@ const ImpulseSpendSlide = ({ data, timeframe, slideRef }: { data: any; timeframe
   )
 }
 
-const GoalProgressSlide = ({ data, slideRef }: { data: any, slideRef?: React.Ref<HTMLDivElement> }) => (
+const GoalProgressSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
-      ref={slideRef}
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-blue-600 to-violet-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -336,7 +317,11 @@ const GoalProgressSlide = ({ data, slideRef }: { data: any, slideRef?: React.Ref
   </motion.div>
 )
 
-const MoneyMoodSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string,  slideRef?: React.Ref<HTMLDivElement>  }) => {
+const MoneyMoodSlide = ({
+  data,
+  timeframe,
+  slideRef,
+}: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
   const content =
     timeframe === "weekly"
       ? { title: "Money Mood", value: data.moneyMood.type, emoji: data.moneyMood.emoji }
@@ -364,9 +349,10 @@ const MoneyMoodSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: s
   )
 }
 
-const TopMerchantsSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
+// Update the TopMerchantsSlide component to handle potentially missing topMerchants
+const TopMerchantsSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
-      ref={slideRef}
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-yellow-600 to-orange-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -381,7 +367,7 @@ const TopMerchantsSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Re
       <h1 className="text-4xl sm:text-5xl font-bold mb-8 text-center">Your Top Merchants</h1>
 
       <div className="space-y-6">
-        {data.topMerchants.map((merchant: any, index: number) => (
+        {(data.topMerchants || []).slice(0, 3).map((merchant: any, index: number) => (
           <motion.div
             key={merchant.name}
             initial={{ x: -20, opacity: 0 }}
@@ -394,18 +380,23 @@ const TopMerchantsSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Re
                 <h3 className="text-2xl font-bold">{merchant.name}</h3>
                 <p className="text-lg opacity-80">{merchant.category}</p>
               </div>
-              <span className="text-2xl font-bold">${merchant.amount}</span>
+              <span className="text-2xl font-bold">${merchant.amount.toFixed(2)}</span>
             </div>
           </motion.div>
         ))}
+        {(!data.topMerchants || data.topMerchants.length === 0) && (
+          <div className="text-center py-8">
+            <p className="text-xl opacity-80">No merchant data available</p>
+          </div>
+        )}
       </div>
     </motion.div>
   </motion.div>
 )
 
-const ComparisonSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
+const ComparisonSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
-      ref={slideRef}
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-cyan-600 to-blue-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -427,9 +418,9 @@ const ComparisonSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<
   </motion.div>
 )
 
-const HighlightSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
+const HighlightSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
-      ref={slideRef}
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-pink-600 to-purple-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -448,9 +439,9 @@ const HighlightSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<H
   </motion.div>
 )
 
-const FavoriteStoreSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
+const FavoriteStoreSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
-      ref={slideRef}
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-amber-600 to-yellow-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -470,9 +461,9 @@ const FavoriteStoreSlide = ({ data, slideRef }: { data: any,  slideRef?: React.R
   </motion.div>
 )
 
-const ImprovedHabitSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
+const ImprovedHabitSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
-      ref={slideRef}
+    ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-green-600 to-emerald-600 p-8"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -492,7 +483,7 @@ const ImprovedHabitSlide = ({ data, slideRef }: { data: any,  slideRef?: React.R
   </motion.div>
 )
 
-const BuddyHighlightSlide = ({ data, slideRef }: { data: any,  slideRef?: React.Ref<HTMLDivElement>  }) => (
+const BuddyHighlightSlide = ({ data, slideRef }: { data: any; slideRef?: React.Ref<HTMLDivElement> }) => (
   <motion.div
     ref={slideRef}
     className="h-full w-full flex flex-col items-center justify-center text-white bg-gradient-to-br from-blue-600 to-indigo-600 p-8"
@@ -516,42 +507,47 @@ const BuddyHighlightSlide = ({ data, slideRef }: { data: any,  slideRef?: React.
 )
 
 // Add a new StatsOverviewSlide component after the BuddyHighlightSlide component
-const StatsOverviewSlide = ({ data, timeframe, slideRef }: { data: any; timeframe: string, slideRef?: React.Ref<HTMLDivElement> }) => {
+const StatsOverviewSlide = ({
+  data,
+  timeframe,
+  slideRef,
+}: { data: any; timeframe: string; slideRef?: React.Ref<HTMLDivElement> }) => {
   // Use more vibrant gradient backgrounds similar to Spotify Wrapped
-  const gradientClass = 
-    timeframe === "weekly" 
-      ? "from-pink-500 via-purple-500 to-indigo-500" 
+  const gradientClass =
+    timeframe === "weekly"
+      ? "from-pink-500 via-purple-500 to-indigo-500"
       : timeframe === "monthly"
         ? "from-orange-500 via-red-500 to-pink-500"
-        : "from-green-500 via-teal-500 to-blue-500";
-  
+        : "from-green-500 via-teal-500 to-blue-500"
+
   // Prepare period text based on the passed data
-  const periodText = data.period || `Your ${timeframe} overview`;
+  const periodText = data.period || `Your ${timeframe} overview`
 
   // Safely access data properties with fallbacks to prevent rendering errors
-  const totalSpent = data.total || "$0";
-  
+  const totalSpent = data.total || "$0"
+
   // Safely determine top category
-  const topCategory = timeframe === "yearly" && data.topCategory 
-    ? data.topCategory.name 
-    : data.categories && data.categories.length > 0 
-      ? data.categories[0].name 
-      : "None";
-  
+  const topCategory =
+    timeframe === "yearly" && data.topCategory
+      ? data.topCategory.name
+      : data.categories && data.categories.length > 0
+        ? data.categories[0].name
+        : "None"
+
   // Safely access subscription count
-  const subscriptionCount = data.subscriptions?.count || 0;
-  
+  const subscriptionCount = data.subscriptions?.count || 0
+
   // Safely determine impulse/savings metrics
-  const impulseValue = timeframe === "yearly"
-    ? `$${data.impulseWins?.saved || 0}`
-    : timeframe === "monthly"
-      ? `$${data.impulseStats?.saved || 0}`
-      : `${data.impulseCount || 0} paused`;
-  
+  const impulseValue =
+    timeframe === "yearly"
+      ? `${data.impulseWins?.saved || 0}`
+      : timeframe === "monthly"
+        ? `${data.impulseStats?.saved || 0}`
+        : `${data.impulseCount || 0} paused`
+
   // Safely determine last stat
-  const finalStat = timeframe === "yearly" 
-    ? `${data.savingsGrowth || 0}%` 
-    : `$${data.subscriptions?.total?.toFixed(2) || "0.00"}`;
+  const finalStat =
+    timeframe === "yearly" ? `${data.savingsGrowth || 0}%` : `${data.subscriptions?.total?.toFixed(2) || "0.00"}`
 
   // Create stats array with safe values
   const stats = [
@@ -566,10 +562,10 @@ const StatsOverviewSlide = ({ data, timeframe, slideRef }: { data: any; timefram
       label: timeframe === "yearly" ? "Savings Growth" : "Subscription Cost",
       value: finalStat,
     },
-  ];
+  ]
 
   // Safely get categories with fallback
-  const categories = data.categories || [];
+  const categories = data.categories || []
 
   return (
     <motion.div
@@ -590,7 +586,7 @@ const StatsOverviewSlide = ({ data, timeframe, slideRef }: { data: any; timefram
           <h1 className="text-3xl font-bold">Finance Wrapped</h1>
           <div className="text-sm opacity-80">{periodText}</div>
         </div>
-        
+
         {/* Title and main stat */}
         <h2 className="text-4xl font-extrabold mb-8 text-center">
           Your {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)} Expenses
@@ -603,7 +599,7 @@ const StatsOverviewSlide = ({ data, timeframe, slideRef }: { data: any; timefram
           <div className="text-xl font-bold mb-3">Top Categories</div>
           <div className="space-y-3">
             {categories.slice(0, 3).map((category, index) => (
-              <motion.div 
+              <motion.div
                 key={category.name || `category-${index}`}
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -643,20 +639,24 @@ const StatsOverviewSlide = ({ data, timeframe, slideRef }: { data: any; timefram
         </div>
       </motion.div>
     </motion.div>
-  );
-};
+  )
+}
 
 // Main component
 export default function FinanceWrapped() {
   const [isOpen, setIsOpen] = useState(false)
   const [timeframe, setTimeframe] = useState<"weekly" | "monthly" | "yearly">("monthly")
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [data, setData] = useState(monthlyData)
+  const [weeklyData, setWeeklyData] = useState(initialWeeklyData)
+  const [monthlyData, setMonthlyData] = useState(initialMonthlyData)
+  const [yearlyData, setYearlyData] = useState(initialYearlyData)
+  const [data, setData] = useState(initialMonthlyData)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasData, setHasData] = useState(false)
   const slideRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Define slides for each timeframe
-  // Update the weeklySlides array to include the subscription slide
-  // Update the weeklySlides array to include the StatsOverviewSlide at the end
   const weeklySlides = [
     { component: SpendingSummarySlide, props: { data: weeklyData, timeframe: "weekly" } },
     { component: CategoryBreakdownSlide, props: { data: weeklyData, timeframe: "weekly" } },
@@ -668,7 +668,6 @@ export default function FinanceWrapped() {
     { component: StatsOverviewSlide, props: { data: weeklyData, timeframe: "weekly" } },
   ]
 
-  // Update the monthlySlides array to include the StatsOverviewSlide at the end
   const monthlySlides = [
     { component: SpendingSummarySlide, props: { data: monthlyData, timeframe: "monthly" } },
     { component: CategoryBreakdownSlide, props: { data: monthlyData, timeframe: "monthly" } },
@@ -680,18 +679,18 @@ export default function FinanceWrapped() {
     { component: StatsOverviewSlide, props: { data: monthlyData, timeframe: "monthly" } },
   ]
 
-  // Update the yearlySlides array to include the StatsOverviewSlide at the end
   const yearlySlides = [
     { component: SpendingSummarySlide, props: { data: yearlyData, timeframe: "yearly" } },
-    { component: CategoryBreakdownSlide, props: { data: monthlyData, timeframe: "yearly" } },
+    { component: CategoryBreakdownSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: SubscriptionSlide, props: { data: yearlyData, timeframe: "yearly" } },
     { component: FavoriteStoreSlide, props: { data: yearlyData } },
-    { component: ImpulseSpendSlide, props: { data: yearlyData, timeframe: "yearly" } },
+    { component: ImpulseSpendSlide, props: { data: yearlyData } },
     { component: ImprovedHabitSlide, props: { data: yearlyData } },
-    { component: MoneyMoodSlide, props: { data: yearlyData, timeframe: "yearly" } },
+    { component: MoneyMoodSlide, props: { data: yearlyData } },
     { component: BuddyHighlightSlide, props: { data: yearlyData } },
     { component: StatsOverviewSlide, props: { data: yearlyData, timeframe: "yearly" } },
   ]
+
   // Get current slides based on timeframe
   const getSlides = () => {
     switch (timeframe) {
@@ -722,7 +721,7 @@ export default function FinanceWrapped() {
         break
     }
     setCurrentSlide(0)
-  }, [timeframe])
+  }, [timeframe, weeklyData, monthlyData, yearlyData])
 
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
@@ -746,36 +745,36 @@ export default function FinanceWrapped() {
     }
   }
 
-const handleShareImage = async () => {
-  if (!slideRef.current) return
+  const handleShareImage = async () => {
+    if (!slideRef.current) return
 
-  try {
-    const canvas = await html2canvas(slideRef.current)
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"))
-    if (!blob) throw new Error("Failed to generate image")
+    try {
+      const canvas = await html2canvas(slideRef.current)
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"))
+      if (!blob) throw new Error("Failed to generate image")
 
-    const file = new File([blob], "finance-wrapped.png", { type: "image/png" })
+      const file = new File([blob], "finance-wrapped.png", { type: "image/png" })
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        title: "My Finance Wrapped",
-        text: `Here's a snapshot of my ${timeframe} finance insights!`,
-        files: [file],
-      })
-    } else {
-      // Fallback: download image
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "finance-wrapped.png"
-      a.click()
-      URL.revokeObjectURL(url)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: "My Finance Wrapped",
+          text: `Here's a snapshot of my ${timeframe} finance insights!`,
+          files: [file],
+        })
+      } else {
+        // Fallback: download image
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "finance-wrapped.png"
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch (err) {
+      console.error("Share or download failed:", err)
+      alert("Could not share or download the image.")
     }
-  } catch (err) {
-    console.error("Share or download failed:", err)
-    alert("Could not share or download the image.")
   }
-}
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)
@@ -783,6 +782,57 @@ const handleShareImage = async () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
   }, [currentSlide])
+
+  // Update the handleFileUpload function to work with the new API response format
+  const handleFileUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+
+    setIsLoading(true)
+    try {
+      const fileArray = Array.from(files)
+      const analysisResponse = await uploadBankStatements(fileArray)
+
+      // Transform the data for each timeframe
+      const weeklyTransformed = transformAnalysisToWrappedData(analysisResponse, "weekly")
+      const monthlyTransformed = transformAnalysisToWrappedData(analysisResponse, "monthly")
+      const yearlyTransformed = transformAnalysisToWrappedData(analysisResponse, "yearly")
+
+      // Update state with the transformed data
+      setWeeklyData(weeklyTransformed)
+      setMonthlyData(monthlyTransformed)
+      setYearlyData(yearlyTransformed)
+      setHasData(true)
+
+      // Set the current timeframe data
+      switch (timeframe) {
+        case "weekly":
+          setData(weeklyTransformed)
+          break
+        case "monthly":
+          setData(monthlyTransformed)
+          break
+        case "yearly":
+          setData(yearlyTransformed)
+          break
+      }
+    } catch (error) {
+      console.error("Error processing bank statements:", error)
+      alert("Failed to process bank statements. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    handleFileUpload(e.dataTransfer.files)
+  }
 
   // Render the current slide
   const CurrentSlideComponent = slides[currentSlide].component
@@ -796,12 +846,43 @@ const handleShareImage = async () => {
           <p className="text-lg text-gray-600">Your spending insights visualized</p>
         </div>
 
+        {!hasData && (
+          <div
+            className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-8 text-center"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              multiple
+              accept="application/pdf"
+              className="hidden"
+              onChange={(e) => handleFileUpload(e.target.files)}
+            />
+            <div className="mb-4">
+              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+              <h2 className="text-xl font-semibold">Upload Bank Statements</h2>
+              <p className="text-gray-500 mt-2">Drag and drop your PDF files here, or click to browse</p>
+            </div>
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isLoading ? "Processing..." : "Select Files"}
+            </Button>
+          </div>
+        )}
+
         <div className="grid gap-6 md:grid-cols-3">
           <div
-            className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105"
+            className={`bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105 ${!hasData && "opacity-50 pointer-events-none"}`}
             onClick={() => {
-              setTimeframe("weekly")
-              setIsOpen(true)
+              if (hasData) {
+                setTimeframe("weekly")
+                setIsOpen(true)
+              }
             }}
           >
             <div className="p-6 text-white">
@@ -813,10 +894,12 @@ const handleShareImage = async () => {
           </div>
 
           <div
-            className="bg-gradient-to-br from-green-600 to-blue-600 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105"
+            className={`bg-gradient-to-br from-green-600 to-blue-600 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105 ${!hasData && "opacity-50 pointer-events-none"}`}
             onClick={() => {
-              setTimeframe("monthly")
-              setIsOpen(true)
+              if (hasData) {
+                setTimeframe("monthly")
+                setIsOpen(true)
+              }
             }}
           >
             <div className="p-6 text-white">
@@ -828,10 +911,12 @@ const handleShareImage = async () => {
           </div>
 
           <div
-            className="bg-gradient-to-br from-pink-600 to-yellow-600 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105"
+            className={`bg-gradient-to-br from-pink-600 to-yellow-600 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105 ${!hasData && "opacity-50 pointer-events-none"}`}
             onClick={() => {
-              setTimeframe("yearly")
-              setIsOpen(true)
+              if (hasData) {
+                setTimeframe("yearly")
+                setIsOpen(true)
+              }
             }}
           >
             <div className="p-6 text-white">
@@ -857,7 +942,12 @@ const handleShareImage = async () => {
         >
           <X className="h-5 w-5" />
         </Button>
-        <Button variant="outline" size="icon" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleShareImage}>
+        <Button
+          variant="outline"
+          size="icon"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+          onClick={handleShareImage}
+        >
           <Share2 className="h-5 w-5" />
         </Button>
       </div>
