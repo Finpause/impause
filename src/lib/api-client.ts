@@ -92,7 +92,7 @@ export async function uploadBankStatements(files: File[]): Promise<GeminiRespons
   })
 
   try {
-    const response = await fetch("http://localhost:8787/api/gemini", {
+    const response = await fetch("https://ai.impause.tech/api/gemini", {
       method: "POST",
       body: formData,
     })
