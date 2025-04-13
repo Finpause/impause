@@ -732,8 +732,11 @@ export default function FinanceWrapped() {
     if (!slideRef.current) return
 
     try {
-      const canvas = await html2canvas(slideRef.current)
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"))
+      const canvas = await html2canvas(slideRef.current, {
+        scale: 2,
+      })
+      const dataUrl = canvas.toDataURL("image/png")
+      const blob = await fetch(dataUrl).then(res => res.blob())
       if (!blob) throw new Error("Failed to generate image")
 
       const file = new File([blob], "finance-wrapped.png", { type: "image/png" })
