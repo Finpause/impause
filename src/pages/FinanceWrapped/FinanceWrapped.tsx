@@ -730,37 +730,48 @@ export default function FinanceWrapped() {
 
   const handleShareImage = async () => {
     if (!slideRef.current) return
-
+  
     try {
-      const canvas = await html2canvas(slideRef.current, {
+      // Get the main content container within the slide
+      const contentElement = slideRef.current.querySelector(".w-full.max-w-md") || slideRef.current;
+      
+      // Add a small padding to ensure text isn't cut off
+      const padding = 20;
+      
+      const canvas = await html2canvas(contentElement, {
         scale: 2,
-      })
-      const dataUrl = canvas.toDataURL("image/png")
-      const blob = await fetch(dataUrl).then(res => res.blob())
-      if (!blob) throw new Error("Failed to generate image")
-
-      const file = new File([blob], "finance-wrapped.png", { type: "image/png" })
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: "My Finance Wrapped",
-          text: `Here's a snapshot of my ${timeframe} finance insights!`,
-          files: [file],
-        })
-      } else {
-        // Fallback: download image
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = "finance-wrapped.png"
-        a.click()
-        URL.revokeObjectURL(url)
-      }
+        backgroundColor: null, // Transparent background
+        padding: padding,
+        // Keep the gradient background if the contentElement is smaller than the slide
+        onclone: (documentClone, element) => {
+          // If we're capturing just the content div, give it the same background as parent
+          if (element !== slideRef.current) {
+            const computedStyle = getComputedStyle(slideRef.current);
+            element.style.background = computedStyle.background;
+            element.style.borderRadius = '12px';
+            element.style.padding = `${padding}px`;
+          }
+        }
+      });
+      
+      const dataUrl = canvas.toDataURL("image/png");
+      const blob = await fetch(dataUrl).then(res => res.blob());
+      if (!blob) throw new Error("Failed to generate image");
+  
+      // Create a download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `finance-wrapped-${timeframe}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Share or download failed:", err)
-      alert("Could not share or download the image.")
+      console.error("Download failed:", err);
+      alert("Could not download the image.");
     }
-  }
+  };
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)
