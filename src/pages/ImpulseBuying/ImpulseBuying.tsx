@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from "react"
-import { Clock, DollarSign, Target, Heart, ShoppingCart, Brain } from "lucide-react"
+import {useEffect, useRef, useState} from "react"
+import {Brain, Clock, DollarSign, Heart, ShoppingCart, Target} from "lucide-react"
 import PurchaseForm from "./PurchaseForm"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import {Button} from "@/components/ui/button"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {Badge} from "@/components/ui/badge"
+import {Input} from "@/components/ui/input"
+import {Label} from "@/components/ui/label"
+import {generateReflectionPrompts} from "@/lib/api-client"
 
 // Types
 export interface Purchase {
@@ -74,19 +75,6 @@ const defaultPrompts = [
   "How will I feel about this purchase next week?",
   "Does this align with my financial goals?",
 ]
-
-async function generateReflectionPrompts(purchase: Purchase) {
-    // Simulate an API call to generate reflection prompts based on the purchase details
-    return new Promise<string[]>((resolve) => {
-        setTimeout(() => {
-        resolve([
-            `How does buying ${purchase.name} fit into my budget?`,
-            `What are the pros and cons of buying ${purchase.name}?`,
-            `How will I feel about this purchase in a month?`,
-        ])
-        }, 50)
-    })
-}
 
 const ImpulseBuying = () => {
   // Form and purchase state

@@ -1,5 +1,7 @@
 // API client for communicating with the Gemini backend
 
+import { Purchase } from "@/pages/ImpulseBuying/ImpulseBuying"
+
 export interface FinanceAnalysis {
   period: string
   totalSpend: number
@@ -82,6 +84,35 @@ export interface FavoriteStore {
   emoji: string
 }
 
+export async function generateReflectionPrompts(purchase: Purchase): Promise<string[]> {
+  try {
+    const response = await fetch("https://ai.impause.tech/api/reflections", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(purchase),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || "Failed to generate reflection prompts")
+    }
+
+    const data = await response.json()
+
+    // Validate the response structure
+    if (!data.success || !Array.isArray(data.result)) {
+      throw new Error("Invalid response format from the API")
+    }
+
+    return data.result
+  } catch (error) {
+    console.error("Error generating reflection prompts:", error)
+    throw error
+  }
+}
+
 // Function to upload files to the Gemini backend
 export async function uploadBankStatements(files: File[]): Promise<GeminiResponse> {
   const formData = new FormData()
@@ -92,7 +123,7 @@ export async function uploadBankStatements(files: File[]): Promise<GeminiRespons
   })
 
   try {
-    const response = await fetch("https://ai.impause.tech/api/gemini", {
+    const response = await fetch("https://ai.impause.tech/api/statements", {
       method: "POST",
       body: formData,
     })
