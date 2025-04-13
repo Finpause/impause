@@ -79,7 +79,7 @@ const Dashboard = () => {
               Connect with a trusted friend to share financial progress
             </p>
             <Link
-              to="/accountability"
+              to="/accountability-buddy"
               className="flex items-center text-teal-600 font-medium hover:text-teal-700"
             >
               Find a buddy <ArrowRight className="ml-1 h-4 w-4" />

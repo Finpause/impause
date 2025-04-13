@@ -106,7 +106,7 @@ const PurchaseForm = ({ onSubmit }: PurchaseFormProps) => {
                   <FormItem>
                     <FormLabel>Item Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Wireless Headphones" {...field} />
+                      <Input placeholder="Item" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

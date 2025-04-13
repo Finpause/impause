@@ -1,13 +1,27 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, BarChart, Clock, Users, Settings, LogIn } from 'lucide-react';
+"use client"
+
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { Menu, X, BarChart, Clock, Users, LogOut } from "lucide-react"
+import { logout } from "../../services/authService" // Make sure path is correct
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+    setIsOpen(!isOpen)
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      console.log("Logged out successfully")
+      navigate("/") // Redirect to homepage after logout
+    } catch (error) {
+      console.error("Logout failed:", error)
+    }
+  }
 
   return (
     <nav className="bg-gradient-to-r from-purple-600 to-blue-500">
@@ -49,24 +63,12 @@ const Navbar = () => {
             </div>
           </div>
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              to="/settings"
-              className="text-white hover:bg-white/10 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Settings
-            </Link>
-            <Link
-              to="/signin"
-              className="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium border border-transparent"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/signup"
+            <button 
               className="bg-white text-purple-700 hover:bg-white/90 px-3 py-2 rounded-md text-sm font-medium"
+              onClick={handleLogout}
             >
-              Sign up
-            </Link>
+              Log out
+            </button>
           </div>
           <div className="-mr-2 flex md:hidden">
             <button
@@ -88,10 +90,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu, show/hide based on menu state. */}
-      <div
-        className={`${isOpen ? 'block' : 'hidden'} md:hidden`}
-        id="mobile-menu"
-      >
+      <div className={`${isOpen ? "block" : "hidden"} md:hidden`} id="mobile-menu">
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/10">
           <Link
             to="/dashboard"
@@ -133,39 +132,24 @@ const Navbar = () => {
               Accountability
             </div>
           </Link>
-          <Link
-            to="/settings"
-            className="text-white hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium"
-            onClick={toggleMenu}
-          >
-            <div className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Settings
-            </div>
-          </Link>
           <div className="border-t border-white/10 my-2 py-2">
-            <Link
-              to="/signin"
-              className="text-white hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={toggleMenu}
+            <button
+              className="bg-white text-purple-700 hover:bg-white/90 block w-full text-left px-3 py-2 rounded-md text-base font-medium"
+              onClick={() => {
+                handleLogout();
+                toggleMenu();
+              }}
             >
               <div className="flex items-center gap-2">
-                <LogIn className="h-5 w-5" />
-                Sign in
+                <LogOut className="h-5 w-5" />
+                Log out
               </div>
-            </Link>
-            <Link
-              to="/signup"
-              className="bg-white text-purple-700 mt-2 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={toggleMenu}
-            >
-              Sign up
-            </Link>
+            </button>
           </div>
         </div>
       </div>
     </nav>
-  );
-};
+  )
+}
 
 export default Navbar;

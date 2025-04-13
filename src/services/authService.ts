@@ -1,4 +1,4 @@
-import { setAuthToken, removeTokens, getAuthHeaders } from '../utils/auth';
+import { setAuthToken, removeTokens, getAuthHeaders, dispatchAuthChangeEvent } from '../utils/auth';
 
 // Define the auth base URL
 const AUTH_BASE_URL = 'https://auth.impause.tech';
@@ -28,8 +28,10 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 
   const data = await response.json();
   setAuthToken(data.token);
+  dispatchAuthChangeEvent(); // Dispatch event after login
   return data;
 };
+
 export const register = async (
   email: string, 
   password: string, 
@@ -55,6 +57,7 @@ export const register = async (
 
   const data = await response.json();
   setAuthToken(data.token);
+  dispatchAuthChangeEvent(); // Dispatch event after registration
   return data;
 };
 
@@ -98,5 +101,6 @@ export const logout = async (): Promise<void> => {
   } finally {
     // Always clear local tokens, even if the API call fails
     removeTokens();
+    dispatchAuthChangeEvent(); // Dispatch event after logout
   }
 };

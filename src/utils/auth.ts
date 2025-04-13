@@ -35,6 +35,13 @@ export const isAuthenticated = (): boolean => {
   return !!token && !isTokenExpired(token);
 };
 
+
+// Add this to your auth.ts file
+export const dispatchAuthChangeEvent = () => {
+  window.dispatchEvent(new Event('authChange'));
+};
+
+
 export const getAuthHeaders = (): HeadersInit => {
   const token = getAuthToken();
   return {
@@ -42,3 +49,4 @@ export const getAuthHeaders = (): HeadersInit => {
     'Content-Type': 'application/json',
   };
 };
+
