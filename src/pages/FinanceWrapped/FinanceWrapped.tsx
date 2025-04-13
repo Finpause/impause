@@ -582,7 +582,7 @@ const StatsOverviewSlide = ({
         <div className="mb-6">
           <div className="text-xl font-bold mb-3">Top Categories</div>
           <div className="space-y-3">
-            {categories.slice(0, 3).map((category, index) => (
+            {categories.slice(0, 3).map((category: { name: string; amount: number; color: string; percentage: number }, index: number) => (
               <motion.div
                 key={category.name || `category-${index}`}
                 initial={{ x: -20, opacity: 0 }}
