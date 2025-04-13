@@ -115,18 +115,6 @@ const UnifiedNavbar: React.FC = () => {
             {isLoggedIn ? (
               // Actions for logged-in users
               <>
-                <Link
-                  to="/settings"
-                  className="text-white hover:bg-white/10 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Settings
-                </Link>
-                <Link
-                  to="/profile"
-                  className="text-white hover:bg-white/10 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Profile
-                </Link>
                 <button
                   onClick={handleLogout}
                   className="text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium border border-white"
